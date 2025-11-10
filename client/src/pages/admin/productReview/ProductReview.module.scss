@@ -1,0 +1,123 @@
+.card {
+    background: rgba(15, 23, 42, 0.75);
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    padding: 28px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 24px 50px rgba(15, 23, 42, 0.35);
+
+    @media screen and (max-width: 768px) {
+        padding: 20px;
+    }
+}
+
+.searchForm {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 24px;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 260px;
+
+    label {
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: rgba(226, 232, 240, 0.75);
+    }
+
+    input {
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 14px;
+        padding: 12px 14px;
+        color: #f8fafc;
+        font-size: 15px;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, 0.6);
+            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35);
+        }
+    }
+}
+
+.submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+    border: none;
+    color: #0b1120;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+    }
+}
+
+.table {
+    color: #e2e8f0;
+
+    thead th {
+        border: none;
+        background: transparent;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 12px;
+        color: rgba(226, 232, 240, 0.65);
+    }
+
+    tbody tr {
+        td {
+            vertical-align: middle;
+            border-color: rgba(148, 163, 184, 0.12);
+        }
+
+        &:hover {
+            background: rgba(56, 189, 248, 0.12);
+        }
+    }
+}
+
+.actions {
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        background: rgba(248, 113, 113, 0.22);
+        color: #f8fafc;
+        border: 1px solid rgba(248, 113, 113, 0.35);
+        text-decoration: none;
+        transition: background 0.2s ease, transform 0.2s ease;
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(248, 113, 113, 0.32);
+            transform: translateY(-1px);
+        }
+    }
+}
+
+.empty {
+    margin-top: 24px;
+    text-align: center;
+    color: rgba(226, 232, 240, 0.7);
+}

@@ -1,0 +1,118 @@
+.root {
+    min-height: 100vh;
+    padding: 32px;
+    background: radial-gradient(circle at top left, #1f3b73 0%, #111827 55%, #0b1120 100%);
+    font-family: var(--font-poppins);
+    color: #f9fafb;
+
+    @media screen and (max-width: 992px) {
+        padding: 20px 16px 32px;
+    }
+}
+
+.frame {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+
+    @media screen and (max-width: 992px) {
+        flex-direction: column;
+    }
+}
+
+.sidebar {
+    flex: 0 0 260px;
+    max-width: 260px;
+
+    @media screen and (max-width: 992px) {
+        flex: 1 1 auto;
+        max-width: 100%;
+    }
+}
+
+.main {
+    flex: 1 1 auto;
+    min-height: calc(100vh - 64px);
+    background: rgba(17, 24, 39, 0.68);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    backdrop-filter: blur(16px);
+
+    @media screen and (max-width: 768px) {
+        padding: 24px 20px;
+    }
+}
+
+.hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(37, 99, 235, 0.1));
+    border-radius: 20px;
+    border: 1px solid rgba(147, 197, 253, 0.15);
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+        padding: 20px;
+    }
+}
+
+.heroText {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+
+        @media screen and (max-width: 768px) {
+            font-size: 20px;
+        }
+    }
+
+    p {
+        margin: 0;
+        color: rgba(226, 232, 240, 0.8);
+        max-width: 520px;
+        line-height: 1.5;
+    }
+}
+
+.heroActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.primaryAction {
+    align-self: center;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+    color: #0b1120;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+    }
+}
+
+.body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
