@@ -31,7 +31,3 @@ Powerful MERN Stack Ecommerce Project using React, Redux, Node.js, Express, Mong
 ## Cart Page
 
 <img src="./assets/2022-08-03_094443.png" alt="Cart Page" title="Cart Page">
-
-## Order Details
-
-<img src="./assets/2022-08-03_094556.png" alt="Order Details" title="Order Details">
