@@ -25,6 +25,7 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
             public_id: result.public_id,
             url: result.secure_url,
         },
+        lastActive: new Date(), // Set initial lastActive on registration
     });
 
     sendToken(user, 200, res);
@@ -52,6 +53,10 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     if (!isPasswordMatched) {
         return next(new ErrorHandler("Invalid Email or Password", 401));
     }
+
+    // Update lastActive timestamp on login
+    user.lastActive = new Date();
+    await user.save({ validateBeforeSave: false });
 
     sendToken(user, 200, res);
 });
@@ -200,6 +205,15 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
 
 // Logout user   =>   /api/v1/logout
 exports.logout = catchAsyncErrors(async (req, res, next) => {
+    // Update lastActive timestamp on logout (end of session)
+    if (req.user && req.user._id) {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            { lastActive: new Date() },
+            { runValidators: false }
+        );
+    }
+
     res.cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
@@ -225,6 +239,8 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
 
 // Get user details   =>   /api/v1/admin/user/:id
 exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
+    const Order = require("../models/order");
+    
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -233,9 +249,21 @@ exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
         );
     }
 
+    // Get orders count for this user
+    const ordersCount = await Order.countDocuments({ user: user._id });
+
+    // Convert user to object and add ordersCount
+    const userObject = user.toObject();
+    userObject.ordersCount = ordersCount;
+    
+    // Ensure lastActive is included (fallback to updatedAt if not set)
+    if (!userObject.lastActive) {
+        userObject.lastActive = userObject.updatedAt || userObject.createdAt;
+    }
+
     res.status(200).json({
         success: true,
-        user,
+        user: userObject,
     });
 });
 

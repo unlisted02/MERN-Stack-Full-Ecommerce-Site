@@ -65,41 +65,49 @@ const Orders = ({ history }) => {
                         </thead>
 
                         <tbody>
-                            {orders?.map((order) => (
-                                <tr key={order?._id}>
-                                    <td>{order?._id}</td>
-                                    <td>{order.orderItems.length}</td>
-                                    <td>${Number(order?.totalPrice).toFixed(2)}</td>
-                                    <td>{order?.shippingInfo.city}</td>
-                                    <td>
-                                        <span
-                                            className={`${styles.status} ${
-                                                order?.orderStatus === "Delivered"
-                                                    ? styles.success
-                                                    : order?.orderStatus === "Processing"
-                                                    ? styles.processing
-                                                    : styles.pending
-                                            }`}
-                                        >
-                                            {order?.orderStatus}
-                                        </span>
-                                    </td>
-                                    <td className={styles.actions}>
-                                        <Link to={`/admin/order/${order._id}`}>
-                                            <AiOutlineEye size={18} />
-                                            <span>Details</span>
-                                        </Link>
-                                        <button
-                                            onClick={() =>
-                                                deleteOrderHandler(order._id)
-                                            }
-                                        >
-                                            <AiOutlineDelete size={18} />
-                                            <span>Delete</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {orders
+                                ?.slice()
+                                .sort((a, b) => {
+                                    // Sort by createdAt descending (latest first)
+                                    const dateA = new Date(a?.createdAt || 0);
+                                    const dateB = new Date(b?.createdAt || 0);
+                                    return dateB - dateA;
+                                })
+                                .map((order) => (
+                                    <tr key={order?._id}>
+                                        <td>{order?._id}</td>
+                                        <td>{order.orderItems.length}</td>
+                                        <td>${Number(order?.totalPrice).toFixed(2)}</td>
+                                        <td>{order?.shippingInfo.city}</td>
+                                        <td>
+                                            <span
+                                                className={`${styles.status} ${
+                                                    order?.orderStatus === "Delivered"
+                                                        ? styles.success
+                                                        : order?.orderStatus === "Processing"
+                                                        ? styles.processing
+                                                        : styles.pending
+                                                }`}
+                                            >
+                                                {order?.orderStatus}
+                                            </span>
+                                        </td>
+                                        <td className={styles.actions}>
+                                            <Link to={`/admin/order/${order._id}`}>
+                                                <AiOutlineEye size={18} />
+                                                <span>Details</span>
+                                            </Link>
+                                            <button
+                                                onClick={() =>
+                                                    deleteOrderHandler(order._id)
+                                                }
+                                            >
+                                                <AiOutlineDelete size={18} />
+                                                <span>Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </Table>
                 )}

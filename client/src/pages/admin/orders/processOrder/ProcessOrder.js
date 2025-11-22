@@ -1,5 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
-import Sidebar from "../../../../components/admin/sidebar/Sidebar";
+import React, { useEffect, useState } from "react";
 import { useAlert } from "react-alert";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Processorder.module.scss";
@@ -11,8 +10,7 @@ import {
 import { UPDATE_ORDER_RESET } from "../../../../constants/orderConstants";
 import Loader from "../../../../components/loader/Loader";
 import { Link } from "react-router-dom";
-import Navbar from "../../../../components/admin/navbar/Navbar";
-import MetaData from "../../../../components/MetaData";
+import AdminLayout from "../../../../components/admin/layout/AdminLayout";
 
 const ProcessOrder = ({ match }) => {
     const [status, setStatus] = useState("");
@@ -44,8 +42,15 @@ const ProcessOrder = ({ match }) => {
         if (isUpdated) {
             alert.success("Order updated successfully");
             dispatch({ type: UPDATE_ORDER_RESET });
+            dispatch(getOrderDetails(orderId));
         }
     }, [dispatch, alert, error, isUpdated, orderId]);
+
+    useEffect(() => {
+        if (orderStatus && !status) {
+            setStatus(orderStatus);
+        }
+    }, [orderStatus, status]);
 
     const updateOrderHandler = (id) => {
         const formData = new FormData();
@@ -59,156 +64,176 @@ const ProcessOrder = ({ match }) => {
         `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.postalCode}, ${shippingInfo.country}`;
     const isPaid =
         paymentInfo && paymentInfo.status === "succeeded" ? true : false;
+    
+    const headerSubtitle = order?._id
+        ? `Order ID: ${order._id.substring(0, 24)}...`
+        : "View and update order details";
+
     return (
-        <div className={styles.process_order}>
-            <MetaData title={"Process Order"} />
-            <div className="row g-0">
-                <div className="col-md-2">
-                    <Sidebar />
+        <AdminLayout
+            metaTitle="Process Order"
+            title="Order Details"
+            subtitle={headerSubtitle}
+        >
+            {loading ? (
+                <div className={styles.loader}>
+                    <Loader />
                 </div>
-                <div className="col-md-10">
-                    <Navbar />
-                    <Fragment>
-                        {loading ? (
-                            <Loader />
-                        ) : (
-                            <div className="row d-flex justify-content-around">
-                                <div className="col-12 col-lg-7 order-details">
-                                    <h2 className="my-5">
-                                        Order # {order._id}
-                                    </h2>
-
-                                    <h4 className="mb-4">Shipping Info</h4>
-                                    <p>
-                                        <b>Name:</b> {user && user.name}
-                                    </p>
-                                    <p>
-                                        <b>Phone:</b>{" "}
-                                        {shippingInfo && shippingInfo.phoneNo}
-                                    </p>
-                                    <p className="mb-4">
-                                        <b>Address:</b>
-                                        {shippingDetails}
-                                    </p>
-                                    <p>
-                                        <b>Amount:</b> ${totalPrice}
-                                    </p>
-
-                                    <hr />
-
-                                    <h4 className="my-4">Payment</h4>
-                                    <p
-                                        className={
-                                            isPaid ? "greenColor" : "redColor"
-                                        }
-                                    >
-                                        <b>{isPaid ? "PAID" : "NOT PAID"}</b>
-                                    </p>
-
-                                    <h4 className="my-4">Stripe ID</h4>
-                                    <p>
-                                        <b>{paymentInfo && paymentInfo.id}</b>
-                                    </p>
-
-                                    <h4 className="my-4">Order Status:</h4>
-                                    <p
-                                        className={
-                                            order.orderStatus &&
-                                            String(order.orderStatus).includes(
-                                                "Delivered"
-                                            )
-                                                ? "greenColor"
-                                                : "redColor"
-                                        }
-                                    >
-                                        <b>{orderStatus}</b>
-                                    </p>
-
-                                    <h4 className="my-4">Order Items:</h4>
-
-                                    <hr />
-                                    <div className="cart-item my-1">
-                                        {orderItems &&
-                                            orderItems.map((item) => (
-                                                <div
-                                                    key={item.product}
-                                                    className="row my-5"
-                                                >
-                                                    <div className="col-4 col-lg-2">
-                                                        <img
-                                                            src={item.image}
-                                                            alt={item.name}
-                                                            height="45"
-                                                            width="65"
-                                                        />
-                                                    </div>
-
-                                                    <div className="col-5 col-lg-5">
-                                                        <Link
-                                                            to={`/products/${item.product}`}
-                                                        >
-                                                            {item.name}
-                                                        </Link>
-                                                    </div>
-
-                                                    <div className="col-4 col-lg-2 mt-4 mt-lg-0">
-                                                        <p>${item.price}</p>
-                                                    </div>
-
-                                                    <div className="col-4 col-lg-3 mt-4 mt-lg-0">
-                                                        <p>
-                                                            {item.quantity}{" "}
-                                                            Piece(s)
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                    <hr />
+            ) : (
+                <div className={styles.container}>
+                    <div className={styles.grid}>
+                        {/* Order Information Card */}
+                        <div className={styles.card}>
+                            <h3 className={styles.cardTitle}>Order Information</h3>
+                            
+                            <div className={styles.infoSection}>
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Order ID</span>
+                                    <p className={styles.value}>{order._id}</p>
                                 </div>
-
-                                <div className="col-12 col-lg-3 mt-5">
-                                    <h4 className="my-4">Status</h4>
-
-                                    <div className="form-group">
-                                        <select
-                                            className="form-control"
-                                            name="status"
-                                            value={status}
-                                            onChange={(e) =>
-                                                setStatus(e.target.value)
-                                            }
-                                        >
-                                            <option value="Processing">
-                                                Processing
-                                            </option>
-                                            <option value="On The Way">
-                                                On The Way
-                                            </option>
-                                            <option value="Shipped">
-                                                Shipped
-                                            </option>
-                                            <option value="Delivered">
-                                                Delivered
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <button
-                                        className="btn btn-primary btn-block mt-3"
-                                        onClick={() =>
-                                            updateOrderHandler(order._id)
-                                        }
+                                
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Total Amount</span>
+                                    <p className={styles.value}>${totalPrice}</p>
+                                </div>
+                                
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Order Status</span>
+                                    <span
+                                        className={`${styles.statusBadge} ${
+                                            orderStatus === "Delivered"
+                                                ? styles.delivered
+                                                : orderStatus === "Processing"
+                                                ? styles.processing
+                                                : styles.pending
+                                        }`}
                                     >
-                                        Update Status
-                                    </button>
+                                        {orderStatus}
+                                    </span>
+                                </div>
+                                
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Payment Status</span>
+                                    <span
+                                        className={`${styles.statusBadge} ${
+                                            isPaid ? styles.paid : styles.unpaid
+                                        }`}
+                                    >
+                                        {isPaid ? "PAID" : "NOT PAID"}
+                                    </span>
+                                </div>
+                                
+                                {paymentInfo?.id && (
+                                    <div className={styles.infoItem}>
+                                        <span className={styles.label}>Payment ID</span>
+                                        <p className={styles.value}>{paymentInfo.id}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Shipping Information Card */}
+                        <div className={styles.card}>
+                            <h3 className={styles.cardTitle}>Shipping Information</h3>
+                            
+                            <div className={styles.infoSection}>
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Name</span>
+                                    <p className={styles.value}>{user?.name || "N/A"}</p>
+                                </div>
+                                
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Phone</span>
+                                    <p className={styles.value}>
+                                        {shippingInfo?.phoneNo || "N/A"}
+                                    </p>
+                                </div>
+                                
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Address</span>
+                                    <p className={styles.value}>
+                                        {shippingDetails || "N/A"}
+                                    </p>
                                 </div>
                             </div>
-                        )}
-                    </Fragment>
+                        </div>
+
+                        {/* Update Status Card */}
+                        <div className={styles.card}>
+                            <h3 className={styles.cardTitle}>Update Order Status</h3>
+                            
+                            <div className={styles.updateSection}>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="status" className={styles.label}>
+                                        Status
+                                    </label>
+                                    <select
+                                        id="status"
+                                        className={styles.select}
+                                        name="status"
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Processing">Processing</option>
+                                        <option value="On The Way">On The Way</option>
+                                        <option value="Shipped">Shipped</option>
+                                        <option value="Delivered">Delivered</option>
+                                    </select>
+                                </div>
+
+                                <button
+                                    className={styles.updateButton}
+                                    onClick={() => updateOrderHandler(order._id)}
+                                    disabled={!status || status === orderStatus}
+                                >
+                                    Update Status
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Order Items Card */}
+                    <div className={styles.card}>
+                        <h3 className={styles.cardTitle}>Order Items</h3>
+                        
+                        <div className={styles.orderItems}>
+                            {orderItems?.map((item) => (
+                                <div key={item.product} className={styles.orderItem}>
+                                    <div className={styles.itemImage}>
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                        />
+                                    </div>
+                                    
+                                    <div className={styles.itemDetails}>
+                                        <Link
+                                            to={`/product/${item.product}`}
+                                            className={styles.itemName}
+                                        >
+                                            {item.name}
+                                        </Link>
+                                    </div>
+                                    
+                                    <div className={styles.itemMeta}>
+                                        <span className={styles.itemPrice}>
+                                            ${item.price}
+                                        </span>
+                                        <span className={styles.itemQuantity}>
+                                            Qty: {item.quantity}
+                                        </span>
+                                        <span className={styles.itemTotal}>
+                                            ${(item.price * item.quantity).toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </AdminLayout>
     );
 };
 

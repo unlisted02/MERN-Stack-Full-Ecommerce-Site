@@ -53,18 +53,7 @@ const UpdateProduct = ({ history }) => {
     } = useSelector((state) => state.product);
 
     useEffect(() => {
-        if (product && product._id !== id) {
-            dispatch(getProductDetails(id));
-        } else {
-            setName(product.name);
-            setPrice(product.price);
-            setDescription(product.description);
-            setCategory(product.category);
-            setSeller(product.seller);
-            setStock(product.stock);
-            setType(product.type);
-            setOldImages(product.images);
-        }
+        dispatch(getProductDetails(id));
 
         if (error) {
             alert.error(error);
@@ -81,7 +70,20 @@ const UpdateProduct = ({ history }) => {
             alert.success("Product updated successfully");
             dispatch({ type: UPDATE_PRODUCT_RESET });
         }
-    }, [dispatch, alert, error, isUpdated, history, updateError, product, id]);
+    }, [dispatch, alert, error, isUpdated, history, updateError, id]);
+    
+    useEffect(() => {
+        if (product && product._id === id) {
+            setName(product.name);
+            setPrice(product.price);
+            setDescription(product.description);
+            setCategory(product.category);
+            setSeller(product.seller);
+            setStock(product.stock);
+            setType(product.type);
+            setOldImages(product.images);
+        }
+    }, [product, id]);
 
     const submitHandler = (e) => {
         e.preventDefault();

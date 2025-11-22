@@ -1,5 +1,6 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
+const User = require("../models/user");
 
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
@@ -27,6 +28,13 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
         paidAt: Date.now(),
         user: req.user._id,
     });
+
+    // Update user's lastActive timestamp on order creation (key activity)
+    await User.findByIdAndUpdate(
+        req.user._id,
+        { lastActive: new Date() },
+        { runValidators: false }
+    );
 
     res.status(200).json({
         success: true,
@@ -65,7 +73,8 @@ exports.getSingleOrder = catchAsyncErrors(async (req, res, next) => {
 
 // Get all orders - ADMIN  =>   /api/v1/admin/orders/
 exports.allOrders = catchAsyncErrors(async (req, res, next) => {
-    const orders = await Order.find();
+    // Sort orders by createdAt descending (latest first)
+    const orders = await Order.find().sort({ createdAt: -1 });
 
     let totalAmount = 0;
 
