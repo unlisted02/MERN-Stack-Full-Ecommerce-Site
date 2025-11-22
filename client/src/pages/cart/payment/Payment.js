@@ -45,7 +45,13 @@ const Payment = ({ history }) => {
             alert.error(error);
             dispatch(clearErrors());
         }
-    }, [dispatch, alert, error]);
+
+        // Redirect if Stripe is not enabled
+        if (!stripe) {
+            alert.error("Payment processing is currently disabled");
+            history.push("/confirm");
+        }
+    }, [dispatch, alert, error, stripe, history]);
 
     const order = {
         orderItems: cartItems,
@@ -60,14 +66,27 @@ const Payment = ({ history }) => {
         order.totalPrice = orderInfo.totalPrice;
     }
 
-    const paymentData = {
-        amount: Math.round(orderInfo.totalPrice * 100),
-    };
-
     const submitHandler = async (e) => {
         e.preventDefault();
 
+        // Safety checks
+        if (!stripe || !elements) {
+            alert.error("Payment processing is currently unavailable");
+            history.push("/confirm");
+            return;
+        }
+
+        if (!orderInfo || !orderInfo.totalPrice) {
+            alert.error("Order information is missing. Please start checkout again.");
+            history.push("/confirm");
+            return;
+        }
+
         document.querySelector("#pay_btn").disabled = true;
+
+        const paymentData = {
+            amount: Math.round(orderInfo.totalPrice * 100),
+        };
 
         let res;
         try {
@@ -100,7 +119,21 @@ const Payment = ({ history }) => {
             });
 
             if (result.error) {
-                alert.error(result.error.message);
+                // Handle various Stripe errors
+                let errorMessage = result.error.message;
+                
+                // Make error messages more user-friendly
+                if (result.error.type === "card_error") {
+                    errorMessage = `Card Error: ${result.error.message}`;
+                } else if (result.error.type === "validation_error") {
+                    errorMessage = `Validation Error: ${result.error.message}`;
+                } else if (result.error.type === "rate_limit_error") {
+                    errorMessage = "Too many requests. Please try again later.";
+                } else {
+                    errorMessage = `Payment Error: ${result.error.message}`;
+                }
+                
+                alert.error(errorMessage);
                 document.querySelector("#pay_btn").disabled = false;
             } else {
                 // The payment is processed or not
@@ -119,7 +152,15 @@ const Payment = ({ history }) => {
             }
         } catch (error) {
             document.querySelector("#pay_btn").disabled = false;
-            alert.error(error.response.data.message);
+            
+            // Handle different error types
+            if (error.response && error.response.data && error.response.data.message) {
+                alert.error(error.response.data.message);
+            } else if (error.message) {
+                alert.error(`Payment Error: ${error.message}`);
+            } else {
+                alert.error("An unexpected error occurred. Please try again.");
+            }
         }
     };
     return (

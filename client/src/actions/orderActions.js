@@ -39,7 +39,7 @@ export const createOrder = (order) => async (dispatch, getState) => {
 
         dispatch({
             type: CREATE_ORDER_SUCCESS,
-            payload: data,
+            payload: data.order || data,
         });
     } catch (error) {
         dispatch({

@@ -32,10 +32,24 @@
             td {
                 vertical-align: middle;
                 border-color: rgba(148, 163, 184, 0.12);
+                color: #e2e8f0 !important;
+
+                a {
+                    color: #e2e8f0 !important;
+                    text-decoration: none;
+
+                    &:hover {
+                        color: #60a5fa !important;
+                    }
+                }
             }
 
             &:hover {
                 background: rgba(30, 64, 175, 0.08);
+
+                td {
+                    color: #f8fafc !important;
+                }
             }
         }
     }

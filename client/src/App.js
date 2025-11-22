@@ -45,9 +45,13 @@ function App() {
         store.dispatch(loadUser());
 
         async function getStripApiKey() {
-            const { data } = await axiosInstance.get("/api/v1/stripeapi");
-
-            setStripeApiKey(data.stripeApiKey);
+            try {
+                const { data } = await axiosInstance.get("/api/v1/stripeapi");
+                setStripeApiKey(data.stripeApiKey || "");
+            } catch (error) {
+                // Stripe is disabled or not configured
+                setStripeApiKey("");
+            }
         }
 
         getStripApiKey();

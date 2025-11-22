@@ -27,13 +27,7 @@ const UserDetails = ({ history, match }) => {
     const userId = match.params.id;
 
     useEffect(() => {
-        if (user && user._id !== userId) {
-            dispatch(getUserDetails(userId));
-        } else {
-            setName(user.name);
-            setEmail(user.email);
-            setRole(user.role);
-        }
+        dispatch(getUserDetails(userId));
 
         if (error) {
             alert.error(error);
@@ -46,10 +40,18 @@ const UserDetails = ({ history, match }) => {
                 type: UPDATE_USER_RESET,
             });
 
-            history.push(`/admin/user/details/${user._id}`);
+            dispatch(getUserDetails(userId));
             setShow(false);
         }
-    }, [dispatch, alert, error, history, isUpdated, userId, user]);
+    }, [dispatch, alert, error, history, isUpdated, userId]);
+
+    useEffect(() => {
+        if (user && user._id === userId) {
+            setName(user.name);
+            setEmail(user.email);
+            setRole(user.role);
+        }
+    }, [user, userId]);
 
     const submitHandler = (e) => {
         e.preventDefault();
@@ -100,7 +102,7 @@ const UserDetails = ({ history, match }) => {
                             <span className={styles.label}>Full name</span>
                             <p>{user?.name || "—"}</p>
                         </div>
-                        <div>
+                        <div className={styles.emailField}>
                             <span className={styles.label}>Email</span>
                             <p>{user?.email || "—"}</p>
                         </div>
@@ -129,7 +131,9 @@ const UserDetails = ({ history, match }) => {
                         <li>
                             <span>Last active</span>
                             <strong>
-                                {user?.updatedAt
+                                {user?.lastActive
+                                    ? new Date(user.lastActive).toLocaleString()
+                                    : user?.updatedAt
                                     ? new Date(user.updatedAt).toLocaleString()
                                     : "—"}
                             </strong>

@@ -74,11 +74,23 @@
         padding: 14px;
         border-radius: 16px;
         background: rgba(30, 41, 59, 0.6);
+        min-width: 0;
 
         p {
             margin: 0;
             color: rgba(226, 232, 240, 0.92);
             font-weight: 500;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+    }
+
+    .emailField {
+        p {
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            hyphens: auto;
         }
     }
 }
