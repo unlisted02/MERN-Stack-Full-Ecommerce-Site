@@ -27,12 +27,6 @@ app.use("/api/v1", products);
 app.use("/api/v1", payment);
 app.use("/api/v1", order);
 
-app.use(express.static(path.join(__dirname, "/client/build")));
-
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "/client/build", "index.html"));
-});
-
 // connecting to database
 connectDatabase();
 
@@ -43,9 +37,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-app.use("/", (req, res) => {
-    res.send("App is running.");
-});
+// Serve static files from React app (production only)
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "/client/build")));
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "/client/build", "index.html"));
+    });
+}
 
 // Middleware to handle error
 app.use(errorMiddleware);
