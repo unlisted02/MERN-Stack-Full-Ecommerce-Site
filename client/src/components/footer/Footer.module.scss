@@ -44,19 +44,47 @@
                     color: var(--color-gray);
                     font-size: 16px;
                 }
+                form {
+                    display: flex;
+                    gap: 0;
+                    margin-top: 10px;
+                }
                 input {
+                    flex: 1;
                     height: 35px;
                     border: 1px solid black;
+                    border-right: none;
                     outline: none;
                     background-color: #fff;
                     padding: 0.5rem 1rem;
+                    font-size: 14px;
+                    
+                    &:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
                 }
                 button {
-                    border: none;
+                    border: 1px solid black;
+                    border-left: none;
                     height: 35px;
-                    padding: 0 0.5rem;
+                    padding: 0 0.75rem;
                     background-color: black;
                     color: white;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background-color 0.3s ease;
+                    
+                    &:hover:not(:disabled) {
+                        background-color: #333;
+                    }
+                    
+                    &:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
                 }
             }
         }

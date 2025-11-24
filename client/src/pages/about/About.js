@@ -16,25 +16,25 @@ const About = () => {
             icon: <FcAutomotive size={60} />,
             title: "Free Delevery",
             description:
-                "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Beatae, nihil!",
+                "Free delivery on all orders",
         },
         {
             icon: <FcCurrencyExchange size={60} />,
             title: "100% Cash Back",
             description:
-                "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Beatae, nihil!",
+                "Money back guarantee on all products",
         },
         {
             icon: <FcRating size={60} />,
             title: "Quality Product",
             description:
-                "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Beatae, nihil!",
+                "Best quality products from trusted brands",
         },
         {
             icon: <FcCustomerSupport size={60} />,
             title: "24/7 Support",
             description:
-                "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Beatae, nihil!",
+                "All time support for all your needs",
         },
     ];
     return (
