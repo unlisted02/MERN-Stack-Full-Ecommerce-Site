@@ -20,15 +20,16 @@ const sendEmail = async (options) => {
   console.log(`[Email] Attempting to send from: ${email}`);
   console.log(`[Email] Password length: ${password.length} characters`);
   
-  const transporterConfig = {
+const resolvedPort = parseInt(process.env.SMTP_PORT, 10) || (isGmail ? 587 : 465);
+const transporterConfig = {
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || (isGmail ? 587 : 465),
-    secure: isGmail ? false : true, // Gmail uses TLS on port 587, not SSL
+    port: resolvedPort,
+    secure: resolvedPort === 465, // only use SSL when explicitly on port 465
     auth: {
-      user: email,
-      pass: password, // App Password (spaces automatically removed)
+        user: email,
+        pass: password, // App Password (spaces automatically removed)
     },
-  };
+};
 
   // For Gmail, add TLS options
   if (isGmail) {
