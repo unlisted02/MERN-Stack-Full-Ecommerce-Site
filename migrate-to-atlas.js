@@ -104,7 +104,8 @@ const migrate = async () => {
     const atlasConnection = await connectAtlas();
 
     // List of collections to migrate
-    const collections = ["products", "users", "orders", "reviews"];
+    // TODO: Add more collections to migrate here
+    const collections = ["products", "users", "orders", "reviews", "newsletters"];
 
     console.log("\n📋 Collections to migrate:", collections.join(", "));
 
