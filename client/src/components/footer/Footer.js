@@ -1,8 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
+import { useAlert } from "react-alert";
 import { AiOutlineMail } from "react-icons/ai";
 import styles from "./Footer.module.scss";
+import { axiosInstance } from "../../config";
+import ButtonLoader from "../loader/ButtonLoader";
 
 const Footer = () => {
+    const alert = useAlert();
+    const [email, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const submitHandler = async (e) => {
+        e.preventDefault();
+
+        if (!email) {
+            alert.error("Please enter your email address");
+            return;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert.error("Please enter a valid email address");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            };
+
+            const { data } = await axiosInstance.post(
+                "/api/v1/newsletter/subscribe",
+                { email },
+                config
+            );
+
+            alert.success(data.message || "Successfully subscribed to newsletter!");
+            setEmail("");
+        } catch (error) {
+            alert.error(
+                error.response?.data?.message || "Failed to subscribe. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className={styles.footer}>
             <div className={styles.footer_info}>
@@ -60,10 +108,23 @@ const Footer = () => {
                                     <p>
                                         Send us your email to get the latest news and updates.
                                     </p>
-                                    <input type="email" />
-                                    <button>
-                                        <AiOutlineMail />
-                                    </button>
+                                    <form onSubmit={submitHandler}>
+                                        <input
+                                            type="email"
+                                            placeholder="Enter your email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            disabled={loading}
+                                        />
+                                        <button type="submit" disabled={loading}>
+                                            {loading ? (
+                                                <ButtonLoader />
+                                            ) : (
+                                                <AiOutlineMail />
+                                            )}
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

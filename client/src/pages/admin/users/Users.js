@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAlert } from "react-alert";
 import { Table } from "react-bootstrap";
-import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye, AiOutlineMail, AiOutlineUser } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
@@ -9,6 +9,10 @@ import {
     clearErrors,
     deleteUser,
 } from "../../../actions/userActions";
+import {
+    getNewsletterSubscribers,
+    clearNewsletterErrors,
+} from "../../../actions/newsletterActions";
 import Loader from "../../../components/loader/Loader";
 import { DELETE_USER_RESET } from "../../../constants/userConstants";
 import styles from "./Users.module.scss";
@@ -17,16 +21,28 @@ import AdminLayout from "../../../components/admin/layout/AdminLayout";
 const Users = ({ history }) => {
     const alert = useAlert();
     const dispatch = useDispatch();
+    const [activeTab, setActiveTab] = useState("users"); // "users" or "subscribers"
 
     const { loading, error, users } = useSelector((state) => state.allUsers);
     const { isDeleted } = useSelector((state) => state.user);
+    const {
+        loading: subscribersLoading,
+        error: subscribersError,
+        subscribers,
+    } = useSelector((state) => state.newsletterSubscribers);
 
     useEffect(() => {
         dispatch(allUsers());
+        dispatch(getNewsletterSubscribers());
 
         if (error) {
             alert.error(error);
             dispatch(clearErrors());
+        }
+
+        if (subscribersError) {
+            alert.error(subscribersError);
+            dispatch(clearNewsletterErrors());
         }
 
         if (isDeleted) {
@@ -34,10 +50,28 @@ const Users = ({ history }) => {
             history.push("/admin/users");
             dispatch({ type: DELETE_USER_RESET });
         }
-    }, [dispatch, alert, error, isDeleted, history]);
+    }, [
+        dispatch,
+        alert,
+        error,
+        subscribersError,
+        isDeleted,
+        history,
+    ]);
 
     const deleteUserHandler = (id) => {
         dispatch(deleteUser(id));
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     };
     return (
         <AdminLayout
@@ -45,70 +79,139 @@ const Users = ({ history }) => {
             title="Customer & admin accounts"
             subtitle="Manage roles, review profiles, and keep your user list clean."
         >
-            <div className={styles.card}>
-                {loading ? (
-                    <div className={styles.loader}>
-                        <Loader />
-                    </div>
-                ) : (
-                    <Table responsive className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Avatar</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {users?.map((user) => (
-                                <tr key={user?._id}>
-                                    <td>{user?._id}</td>
-                                    <td>
-                                        <img
-                                            className={styles.avatar}
-                                            src={user?.avatar.url}
-                                            alt={user?.name}
-                                        />
-                                    </td>
-                                    <td>{user?.name}</td>
-                                    <td>{user?.email}</td>
-                                    <td>
-                                        <span
-                                            className={`${styles.roleBadge} ${
-                                                user?.role === "admin"
-                                                    ? styles.admin
-                                                    : styles.customer
-                                            }`}
-                                        >
-                                            {user?.role}
-                                        </span>
-                                    </td>
-                                    <td className={styles.actions}>
-                                        <Link
-                                            to={`/admin/user/details/${user._id}`}
-                                        >
-                                            <AiOutlineEye size={18} />
-                                            <span>View</span>
-                                        </Link>
-                                        <button
-                                            onClick={() =>
-                                                deleteUserHandler(user._id)
-                                            }
-                                        >
-                                            <AiOutlineDelete size={18} />
-                                            <span>Delete</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                )}
+            {/* Tabs */}
+            <div className={styles.tabs}>
+                <button
+                    className={`${styles.tab} ${
+                        activeTab === "users" ? styles.active : ""
+                    }`}
+                    onClick={() => setActiveTab("users")}
+                >
+                    <AiOutlineUser size={16} />
+                    Users ({users?.length || 0})
+                </button>
+                <button
+                    className={`${styles.tab} ${
+                        activeTab === "subscribers" ? styles.active : ""
+                    }`}
+                    onClick={() => setActiveTab("subscribers")}
+                >
+                    <AiOutlineMail size={16} />
+                    Subscribers ({subscribers?.length || 0})
+                </button>
             </div>
+
+            {/* Users Table */}
+            {activeTab === "users" && (
+                <div className={styles.card}>
+                    {loading ? (
+                        <div className={styles.loader}>
+                            <Loader />
+                        </div>
+                    ) : (
+                        <Table responsive className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Avatar</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {users?.map((user) => (
+                                    <tr key={user?._id}>
+                                        <td>{user?._id}</td>
+                                        <td>
+                                            <img
+                                                className={styles.avatar}
+                                                src={user?.avatar.url}
+                                                alt={user?.name}
+                                            />
+                                        </td>
+                                        <td>{user?.name}</td>
+                                        <td>{user?.email}</td>
+                                        <td>
+                                            <span
+                                                className={`${styles.roleBadge} ${
+                                                    user?.role === "admin"
+                                                        ? styles.admin
+                                                        : styles.customer
+                                                }`}
+                                            >
+                                                {user?.role}
+                                            </span>
+                                        </td>
+                                        <td className={styles.actions}>
+                                            <Link
+                                                to={`/admin/user/details/${user._id}`}
+                                            >
+                                                <AiOutlineEye size={18} />
+                                                <span>View</span>
+                                            </Link>
+                                            <button
+                                                onClick={() =>
+                                                    deleteUserHandler(user._id)
+                                                }
+                                            >
+                                                <AiOutlineDelete size={18} />
+                                                <span>Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    )}
+                </div>
+            )}
+
+            {/* Newsletter Subscribers Table */}
+            {activeTab === "subscribers" && (
+                <div className={styles.card}>
+                    {subscribersLoading ? (
+                        <div className={styles.loader}>
+                            <Loader />
+                        </div>
+                    ) : (
+                        <Table responsive className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Subscribed Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {subscribers && subscribers.length > 0 ? (
+                                    subscribers.map((subscriber) => (
+                                        <tr key={subscriber._id}>
+                                            <td>{subscriber.email}</td>
+                                            <td>
+                                                {formatDate(
+                                                    subscriber.subscribedAt
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="2"
+                                            className={styles.emptyState}
+                                        >
+                                            No newsletter subscribers yet.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </Table>
+                    )}
+                </div>
+            )}
         </AdminLayout>
     );
 };

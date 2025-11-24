@@ -1,4 +1,5 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
+import { useAlert } from "react-alert";
 import { FaFacebook } from "react-icons/fa";
 import { BsInstagram, BsYoutube } from "react-icons/bs";
 import styles from "./Contact.module.scss";
@@ -6,8 +7,61 @@ import { FcBusinessContact } from "react-icons/fc";
 import Navbar from "../../components/header/Navbar";
 import Footer from "../../components/footer/Footer";
 import MetaData from "../../components/MetaData";
+import { axiosInstance } from "../../config";
+import ButtonLoader from "../../components/loader/ButtonLoader";
 
 const Contact = () => {
+    const alert = useAlert();
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        message: "",
+    });
+    const [loading, setLoading] = useState(false);
+
+    const { name, email, message } = formData;
+
+    const onChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const submitHandler = async (e) => {
+        e.preventDefault();
+
+        if (!name || !email || !message) {
+            alert.error("Please fill in all fields");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            };
+
+            const { data } = await axiosInstance.post(
+                "/api/v1/contact",
+                formData,
+                config
+            );
+
+            alert.success(data.message || "Your message has been sent successfully!");
+            setFormData({
+                name: "",
+                email: "",
+                message: "",
+            });
+        } catch (error) {
+            alert.error(
+                error.response?.data?.message || "Failed to send message. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
     const contacts = [
         {
             icon: <FcBusinessContact size={50} />,
@@ -97,12 +151,16 @@ const Contact = () => {
                         <div className="row g-3">
                             <div className="col-md-6">
                                 <h3>Get In Touch</h3>
-                                <form className={styles.form}>
+                                <form className={styles.form} onSubmit={submitHandler}>
                                     <div className={styles.from_group}>
                                         <label htmlFor="name_field">Name</label>
                                         <input
                                             type="text"
+                                            name="name"
                                             placeholder="Enter your name ..."
+                                            value={name}
+                                            onChange={onChange}
+                                            required
                                         />
                                     </div>
                                     <div className={styles.from_group}>
@@ -111,21 +169,32 @@ const Contact = () => {
                                         </label>
                                         <input
                                             type="email"
+                                            name="email"
                                             placeholder="Enter your email ..."
+                                            value={email}
+                                            onChange={onChange}
+                                            required
                                         />
                                     </div>
                                     <div className={styles.from_group}>
-                                        <label htmlFor="email_field">
-                                            Email
+                                        <label htmlFor="message_field">
+                                            Message
                                         </label>
                                         <textarea
-                                            placeholder="Enter your text ..."
+                                            name="message"
+                                            placeholder="Enter your message ..."
                                             cols="8"
+                                            rows="5"
+                                            value={message}
+                                            onChange={onChange}
+                                            required
                                         ></textarea>
                                     </div>
 
                                     <div className={styles.from_group}>
-                                        <button type="submit">Send</button>
+                                        <button type="submit" disabled={loading}>
+                                            {loading ? <ButtonLoader /> : "Send"}
+                                        </button>
                                     </div>
                                 </form>
                             </div>
