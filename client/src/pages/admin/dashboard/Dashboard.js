@@ -32,7 +32,8 @@ const Dashboard = () => {
         dispatch(allUsers());
     }, [dispatch]);
 
-    const stockout = products?.filter((item) => item.stock === 0) ?? [];
+    const LOW_STOCK_THRESHOLD = 15;
+    const stockout = products?.filter((item) => item.stock <= LOW_STOCK_THRESHOLD) ?? [];
 
     const stats = [
         {
