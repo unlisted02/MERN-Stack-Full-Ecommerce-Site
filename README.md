@@ -14,7 +14,9 @@ Powerful MERN Stack Ecommerce Project using React, Redux, Node.js, Express, Mong
 -   Complete ratings & reviews system
 -   Complete Cart & Checkout process
 
-
+<a href="https://shopx-ecommerce.onrender.com/">
+  <img src="animated-demo-button.svg" alt="Live DEMO">
+</a>   
 
 ## Homepage
 
