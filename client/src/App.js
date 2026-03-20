@@ -4,7 +4,7 @@ import Home from "./pages/home/Home";
 import Login from "./pages/auth/login/Login";
 import Products from "./pages/products/Products";
 import Register from "./pages/auth/register/Register";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import store from "./store";
 import { loadUser } from "./actions/userActions";
 import Dashboard from "./pages/admin/dashboard/Dashboard";
@@ -49,13 +49,18 @@ function App() {
                 const { data } = await axiosInstance.get("/api/v1/stripeapi");
                 setStripeApiKey(data.stripeApiKey || "");
             } catch (error) {
-                // Stripe is disabled or not configured
                 setStripeApiKey("");
             }
         }
 
         getStripApiKey();
     }, []);
+
+    const stripePromise = useMemo(
+        () => (stripeApiKey ? loadStripe(stripeApiKey) : null),
+        [stripeApiKey]
+    );
+
     return (
         <div className="app">
             <Router>
@@ -99,8 +104,8 @@ function App() {
 
                 <ProtectedRoute path="/shipping" component={Shipping} />
                 <ProtectedRoute path="/confirm" component={ConfirmOrder} />
-                {stripeApiKey && (
-                    <Elements stripe={loadStripe(stripeApiKey)}>
+                {stripePromise && (
+                    <Elements stripe={stripePromise}>
                         <ProtectedRoute path="/payment" component={Payment} />
                     </Elements>
                 )}
