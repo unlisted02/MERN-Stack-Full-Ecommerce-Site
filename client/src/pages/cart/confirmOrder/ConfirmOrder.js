@@ -141,14 +141,8 @@ const ConfirmOrder = ({ history }) => {
             }
 
             setLoading(true);
-            setOrderJustCreated(true); // Mark that we're creating an order
-            
-            console.log("Creating order with data:", {
-                orderItems: cartItems.length,
-                shippingInfo: shippingInfo,
-                totalPrice: totalPrice
-            });
-            
+            setOrderJustCreated(true);
+
             const order = {
                 orderItems: cartItems,
                 shippingInfo,

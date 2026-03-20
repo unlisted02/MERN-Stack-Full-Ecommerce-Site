@@ -5,6 +5,14 @@ const User = require("../models/user");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
+const isStripeEnabled = () =>
+    process.env.STRIPE_SECRET_KEY &&
+    process.env.STRIPE_SECRET_KEY !== "sk_test_yourStripeSecret";
+
+const stripe = isStripeEnabled()
+    ? require("stripe")(process.env.STRIPE_SECRET_KEY)
+    : null;
+
 // Create a new order   =>  /api/v1/order/new
 exports.newOrder = catchAsyncErrors(async (req, res, next) => {
     const {
@@ -16,6 +24,28 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
         totalPrice,
         paymentInfo,
     } = req.body;
+
+    // Verify payment with Stripe before creating the order
+    if (isStripeEnabled() && stripe && paymentInfo && paymentInfo.id !== "manual-order") {
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentInfo.id);
+
+        if (paymentIntent.status !== "succeeded") {
+            return next(
+                new ErrorHandler(
+                    "Payment could not be verified. Please try again.",
+                    400
+                )
+            );
+        }
+
+        // Prevent the same PaymentIntent from creating duplicate orders
+        const existingOrder = await Order.findOne({ "paymentInfo.id": paymentInfo.id });
+        if (existingOrder) {
+            return next(
+                new ErrorHandler("This payment has already been used for an order.", 400)
+            );
+        }
+    }
 
     const order = await Order.create({
         orderItems,
