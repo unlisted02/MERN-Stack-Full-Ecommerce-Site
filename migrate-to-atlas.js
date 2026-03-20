@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
-require("dotenv").config();
+const dotenv = require("dotenv");
+dotenv.config();
+
 
 // Local MongoDB connection
-const LOCAL_DB_URI = "your_local_connection_string";
+const LOCAL_DB_URI = process.env.LOCAL_DB_URI;
 
 // MongoDB Atlas connection
 const ATLAS_DB_URI =
-    "your_atlas_connection_string";
+    process.env.ATLAS_DB_URI;
 
 // Connect to local database
 const connectLocal = async () => {
