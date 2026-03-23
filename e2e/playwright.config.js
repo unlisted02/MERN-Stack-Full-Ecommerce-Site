@@ -21,7 +21,7 @@ module.exports = defineConfig({
     reporter: [["list"], ["html", { open: "never", outputFolder: "../playwright-report" }]],
 
     use: {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.E2E_BASE_URL || "http://localhost:3000",
         channel: "chrome",        // uses your installed Chrome — no binary download needed
         headless: false,          // set to true for CI / faster headless runs
         screenshot: "only-on-failure",

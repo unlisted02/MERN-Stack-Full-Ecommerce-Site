@@ -31,6 +31,16 @@ app.use("/api/v1", order);
 app.use("/api/v1", contact);
 app.use("/api/v1", newsletter);
 
+// Health endpoint
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        ok: true,
+        service: "shopx-api",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+    });
+});
+
 // connecting to database
 connectDatabase();
 
