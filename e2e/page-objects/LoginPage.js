@@ -1,11 +1,24 @@
 class LoginPage {
     constructor(page) {
         this.page = page;
-        this.emailInput    = page.locator('input[type="email"]');
-        this.passwordInput = page.locator('input[type="password"]');
-        this.submitButton  = page.locator('button[type="submit"]');
-        this.forgotLink    = page.locator('a[href="/password/forgot"]');
-        this.registerLink  = page.locator('a[href="/register"]');
+        this.loginContainer = page.locator('h3:has-text("Login")').locator("..");
+        this.emailInput = this.loginContainer.getByPlaceholder(
+            "Enter your email ...",
+            { exact: true }
+        );
+        this.passwordInput = this.loginContainer.getByPlaceholder(
+            "Enter your password ...",
+            { exact: true }
+        );
+        this.submitButton = this.loginContainer.getByRole("button", {
+            name: "Login",
+        });
+        this.forgotLink = this.loginContainer.getByRole("link", {
+            name: "Forgot Password?",
+        });
+        this.registerLink = this.loginContainer.getByRole("link", {
+            name: "Signup",
+        });
     }
 
     async goto() {

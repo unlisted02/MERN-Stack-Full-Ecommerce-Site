@@ -2,6 +2,31 @@ const { test, expect } = require("@playwright/test");
 const { test: authTest } = require("../fixtures/auth.fixture");
 const { CartPage } = require("../page-objects/CartPage");
 
+async function addFirstAvailableProductToCart(page) {
+    await page.goto("/products");
+    await page
+        .locator('[class*="spinner"]')
+        .waitFor({ state: "hidden", timeout: 10000 })
+        .catch(() => {});
+
+    const firstProductLink = page.locator('a[href^="/product/"]').first();
+    const href = await firstProductLink.getAttribute("href");
+    expect(href, "No products in DB to add to cart").toBeTruthy();
+
+    await page.goto(href);
+
+    // Match the real button text used in UI ("Add To Cart").
+    const addToCartButton = page.getByRole("button", { name: /add to cart/i });
+    await expect(addToCartButton, "Product is likely out of stock").toBeEnabled();
+    await addToCartButton.click();
+
+    // Wait until async cart state update finishes (Redux + localStorage + header badge).
+    // Without this, immediate navigation to /cart can happen before item is persisted.
+    await expect(page.locator('a[href="/cart"]')).not.toHaveText(/^0$/, {
+        timeout: 10000,
+    });
+}
+
 /**
  * Cart tests.
  *
@@ -28,50 +53,43 @@ authTest.describe("Cart — authenticated user", () => {
     authTest(
         "can add a product to cart and see it listed",
         async ({ userPage }) => {
-            authTest.skip(
-                !process.env.TEST_USER_EMAIL,
-                "TEST_USER_EMAIL not set — skipping add-to-cart test"
-            );
+            expect(
+                process.env.TEST_USER_EMAIL,
+                "Missing TEST_USER_EMAIL in environment"
+            ).toBeTruthy();
+            expect(
+                process.env.TEST_USER_PASSWORD,
+                "Missing TEST_USER_PASSWORD in environment"
+            ).toBeTruthy();
 
-            // Navigate to products and open the first one
-            await userPage.goto("/products");
-            await userPage
-                .locator('[class*="spinner"]')
-                .waitFor({ state: "hidden", timeout: 10000 })
-                .catch(() => {});
-
-            const firstProductLink = userPage.locator('a[href^="/product/"]').first();
-            const href = await firstProductLink.getAttribute("href");
-
-            if (!href) {
-                authTest.skip(true, "No products in DB");
-            }
-
-            await userPage.goto(href);
-            await userPage.locator('button:has-text("Add to Cart")').click();
+            await addFirstAvailableProductToCart(userPage);
 
             // Go to cart and verify at least 1 item
             const cartPage = new CartPage(userPage);
             await cartPage.goto();
-            await expect(cartPage.cartItems.first()).toBeVisible({ timeout: 8000 });
+            await expect(cartPage.cartItems.first()).toBeVisible({ timeout: 10000 });
         }
     );
 
     authTest(
         "can remove an item from cart",
         async ({ userPage }) => {
-            authTest.skip(
-                !process.env.TEST_USER_EMAIL,
-                "TEST_USER_EMAIL not set — skipping remove-item test"
-            );
+            expect(
+                process.env.TEST_USER_EMAIL,
+                "Missing TEST_USER_EMAIL in environment"
+            ).toBeTruthy();
+            expect(
+                process.env.TEST_USER_PASSWORD,
+                "Missing TEST_USER_PASSWORD in environment"
+            ).toBeTruthy();
+
+            await addFirstAvailableProductToCart(userPage);
 
             const cartPage = new CartPage(userPage);
             await cartPage.goto();
 
             const count = await cartPage.cartItems.count();
-            if (count === 0) {
-                authTest.skip(true, "Cart is empty — add a product first");
-            }
+            expect(count, "Cart is empty — add a product first").toBeGreaterThan(0);
 
             await cartPage.removeItem(0);
 
@@ -83,18 +101,22 @@ authTest.describe("Cart — authenticated user", () => {
     authTest(
         "authenticated checkout goes to /shipping",
         async ({ userPage }) => {
-            authTest.skip(
-                !process.env.TEST_USER_EMAIL,
-                "TEST_USER_EMAIL not set — skipping checkout test"
-            );
+            expect(
+                process.env.TEST_USER_EMAIL,
+                "Missing TEST_USER_EMAIL in environment"
+            ).toBeTruthy();
+            expect(
+                process.env.TEST_USER_PASSWORD,
+                "Missing TEST_USER_PASSWORD in environment"
+            ).toBeTruthy();
+
+            await addFirstAvailableProductToCart(userPage);
 
             const cartPage = new CartPage(userPage);
             await cartPage.goto();
 
             const count = await cartPage.cartItems.count();
-            if (count === 0) {
-                authTest.skip(true, "Cart is empty — cannot test checkout");
-            }
+            expect(count, "Cart is empty — cannot test checkout").toBeGreaterThan(0);
 
             await cartPage.checkout();
             await expect(userPage).toHaveURL(/\/shipping/, { timeout: 8000 });

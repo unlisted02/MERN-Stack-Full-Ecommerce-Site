@@ -33,16 +33,40 @@ test.describe("Public pages smoke tests", () => {
 
     test("login page shows form", async ({ page }) => {
         await page.goto("/login");
-        await expect(page.locator('input[type="email"]')).toBeVisible();
-        await expect(page.locator('input[type="password"]')).toBeVisible();
-        await expect(page.locator('button[type="submit"]')).toBeVisible();
+        const loginContainer = page.locator('h3:has-text("Login")').locator("..");
+        await expect(
+            loginContainer.getByPlaceholder("Enter your email ...", {
+                exact: true,
+            })
+        ).toBeVisible();
+        await expect(
+            loginContainer.getByPlaceholder("Enter your password ...", {
+                exact: true,
+            })
+        ).toBeVisible();
+        await expect(
+            loginContainer.getByRole("button", { name: "Login" })
+        ).toBeVisible();
     });
 
     test("register page shows form", async ({ page }) => {
         await page.goto("/register");
-        await expect(page.locator('input[name="name"]')).toBeVisible();
-        await expect(page.locator('input[name="email"]')).toBeVisible();
-        await expect(page.locator('input[name="password"]')).toBeVisible();
+        const registerContainer = page.locator('h3:has-text("Register")').locator("..");
+        await expect(
+            registerContainer.getByPlaceholder("Enter your name ...", {
+                exact: true,
+            })
+        ).toBeVisible();
+        await expect(
+            registerContainer.getByPlaceholder("Enter your email ...", {
+                exact: true,
+            })
+        ).toBeVisible();
+        await expect(
+            registerContainer.getByPlaceholder("Enter your password ...", {
+                exact: true,
+            })
+        ).toBeVisible();
     });
 
     test("about page loads", async ({ page }) => {

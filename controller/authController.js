@@ -9,13 +9,20 @@ const sendEmail = require("../utils/sendEmail");
 
 // Register a user   => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
+    const { name, email, password } = req.body;
+
+    // Pre-check duplicate email so API returns a deterministic 4xx error
+    // instead of bubbling up as a generic server error.
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return next(new ErrorHandler("Email already exists", 400));
+    }
+
     const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
         folder: "shopx/avatar",
         width: 150,
         crop: "scale",
     });
-
-    const { name, email, password } = req.body;
 
     const user = await User.create({
         name,
