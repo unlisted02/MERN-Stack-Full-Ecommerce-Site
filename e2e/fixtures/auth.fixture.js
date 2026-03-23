@@ -38,9 +38,14 @@ const test = base.extend({
 
 async function loginAs(page, email, password) {
     await page.goto("/login");
-    await page.locator('input[type="email"]').fill(email);
-    await page.locator('input[type="password"]').fill(password);
-    await page.locator('button[type="submit"]').click();
+    const loginContainer = page.locator('h3:has-text("Login")').locator("..");
+    await loginContainer
+        .getByPlaceholder("Enter your email ...", { exact: true })
+        .fill(email);
+    await loginContainer
+        .getByPlaceholder("Enter your password ...", { exact: true })
+        .fill(password);
+    await loginContainer.getByRole("button", { name: "Login" }).click();
     // wait for redirect away from /login
     await page.waitForURL((url) => !url.pathname.includes("/login"), {
         timeout: 10000,

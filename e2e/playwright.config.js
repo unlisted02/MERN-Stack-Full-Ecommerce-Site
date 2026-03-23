@@ -1,4 +1,5 @@
 const { defineConfig } = require("@playwright/test");
+require("dotenv").config({ path: require("path").resolve(__dirname, "..", ".env") });
 
 /**
  * Before running tests, start both servers manually in separate terminals:
